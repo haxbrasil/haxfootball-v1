@@ -82,9 +82,10 @@ msgstr "{0} is down in the end zone"
 msgid "{0} left from the end zone"
 msgstr "{0} left from the end zone"
 
+#. placeholder {0}: player.name
 #: src/modes/classic/shared/commands/handlers/set-score.ts:72
-#~ msgid "{0} set the score."
-#~ msgstr "{0} set the score."
+msgid "{0} set the score."
+msgstr "{0} set the score."
 
 #. placeholder {0}: frame.player.name
 #. placeholder {0}: frame.quarterback.name
@@ -245,7 +246,7 @@ msgstr "{yardsLost}-yard loss"
 
 #. placeholder {0}: player.name
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:210
-#: src/modes/classic/states/extra-point/extra-point.ts:235
+#: src/modes/classic/states/extra-point/extra-point.ts:232
 msgid "*️⃣ {0} starts the two-point try!"
 msgstr "*️⃣ {0} starts the two-point try!"
 
@@ -308,7 +309,7 @@ msgstr "⏱️ Hike within {HIKE_TIMEOUT_SECONDS}s."
 #~ msgstr "⏱️ Kickoff. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:238
-#: src/modes/classic/states/extra-point/extra-point.ts:295
+#: src/modes/classic/states/extra-point/extra-point.ts:292
 msgid "⏱️ PAT window expired."
 msgstr "⏱️ PAT window expired."
 
@@ -425,8 +426,8 @@ msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Only admins can change game positioning."
 
 #: src/modes/classic/shared/commands/handlers/set-score.ts:39
-#~ msgid "⚠️ Only admins can change the score."
-#~ msgstr "⚠️ Only admins can change the score."
+msgid "⚠️ Only admins can change the score."
+msgstr "⚠️ Only admins can change the score."
 
 #: src/modes/classic/definition/index.ts:244
 #: src/modes/flag/definition/index.ts:247
@@ -499,7 +500,7 @@ msgstr "⚠️ That {0} command is unavailable in {1} mode."
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
-#: src/modes/classic/states/extra-point/extra-point.ts:181
+#: src/modes/classic/states/extra-point/extra-point.ts:178
 msgid "⚠️ Two-point try is no longer available"
 msgstr "⚠️ Two-point try is no longer available"
 
@@ -544,8 +545,8 @@ msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Usage: !qb [#id|name]."
 
 #: src/modes/classic/shared/commands/handlers/set-score.ts:53
-#~ msgid "⚠️ Usage: !setscore <red> <blue> (0-255)."
-#~ msgstr "⚠️ Usage: !setscore <red> <blue> (0-255)."
+msgid "⚠️ Usage: !setscore <red> <blue> (0-255)."
+msgstr "⚠️ Usage: !setscore <red> <blue> (0-255)."
 
 #: src/modes/classic/shared/commands/handlers/set-score.ts:49
 #~ msgid "⚠️ Usage: !setscore <red> <blue>."
@@ -556,7 +557,7 @@ msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status
 msgstr "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:158
-#: src/modes/classic/states/extra-point/extra-point.ts:168
+#: src/modes/classic/states/extra-point/extra-point.ts:165
 #: src/modes/classic/states/scrimmage/presnap.ts:281
 #: src/modes/flag/states/presnap.ts:256
 msgid "⚠️ Wait a moment before snapping."
@@ -575,7 +576,7 @@ msgid "⚠️ You are too far from the ball to punt."
 msgstr "⚠️ You are too far from the ball to punt."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:170
-#: src/modes/classic/states/extra-point/extra-point.ts:195
+#: src/modes/classic/states/extra-point/extra-point.ts:192
 #: src/modes/classic/states/scrimmage/presnap.ts:293
 #: src/modes/flag/states/presnap.ts:268
 msgid "⚠️ You are too far from the ball to snap it."
@@ -607,7 +608,7 @@ msgid "⚠️ You cannot punt while a teammate is past the LOS."
 msgstr "⚠️ You cannot punt while a teammate is past the LOS."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:193
-#: src/modes/classic/states/extra-point/extra-point.ts:218
+#: src/modes/classic/states/extra-point/extra-point.ts:215
 #: src/modes/classic/states/scrimmage/presnap.ts:330
 #: src/modes/flag/states/presnap.ts:305
 msgid "⚠️ You cannot snap while a defensive player is past the LOS."
@@ -629,7 +630,7 @@ msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:198
-#: src/modes/classic/states/extra-point/extra-point.ts:223
+#: src/modes/classic/states/extra-point/extra-point.ts:220
 #: src/modes/classic/states/scrimmage/presnap.ts:314
 #: src/modes/classic/states/scrimmage/presnap.ts:336
 #: src/modes/flag/states/presnap.ts:289
@@ -756,7 +757,7 @@ msgstr "❌ Incorrect password. Try again."
 msgid "❌ Kickoff out of bounds"
 msgstr "❌ Kickoff out of bounds"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:386
+#: src/modes/classic/states/extra-point/extra-point.ts:383
 msgid "❌ Offense crossed the LOS"
 msgstr "❌ Offense crossed the LOS"
 
@@ -1350,7 +1351,7 @@ msgstr "defensive illegal touch"
 msgid "defensive illegal touch by {offenderNames}"
 msgstr "defensive illegal touch by {offenderNames}"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:323
+#: src/modes/classic/states/extra-point/extra-point.ts:320
 msgid "Defensive kick foul"
 msgstr "Defensive kick foul"
 
@@ -1381,7 +1382,7 @@ msgstr "Enables the hike timeout."
 #: src/modes/classic/states/extra-point/extra-point-run.ts:226
 #: src/modes/classic/states/extra-point/extra-point-snap-in-flight.ts:199
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:754
-#: src/modes/classic/states/extra-point/extra-point.ts:400
+#: src/modes/classic/states/extra-point/extra-point.ts:397
 msgid "Extra point"
 msgstr "Extra point"
 
@@ -1465,7 +1466,7 @@ msgstr "Illegal touch by {offenderNames}"
 msgid "Interception"
 msgstr "Interception"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:182
+#: src/modes/classic/states/extra-point/extra-point.ts:179
 msgid "kick the PAT."
 msgstr "kick the PAT."
 
@@ -1509,7 +1510,7 @@ msgstr "kickoff touched first by {0} from the kicking team."
 #~ msgid "Kickoff."
 #~ msgstr "Kickoff."
 
-#: src/modes/classic/definition/commands.ts:65
+#: src/modes/classic/definition/commands.ts:70
 #: src/modes/flag/definition/commands.ts:45
 msgid "List all config flags"
 msgstr "List all config flags"
@@ -1798,7 +1799,7 @@ msgstr "SAFETY!"
 msgid "SAFETY! Kick within {SAFETY_KICK_TIMEOUT_SECONDS}s."
 msgstr "SAFETY! Kick within {SAFETY_KICK_TIMEOUT_SECONDS}s."
 
-#: src/modes/classic/definition/commands.ts:55
+#: src/modes/classic/definition/commands.ts:60
 msgid "Set or clear the current quarterback"
 msgstr "Set or clear the current quarterback"
 
@@ -1812,8 +1813,8 @@ msgid "Set the distance to first down"
 msgstr "Set the distance to first down"
 
 #: src/modes/classic/definition/commands.ts:55
-#~ msgid "Set the game score"
-#~ msgstr "Set the game score"
+msgid "Set the game score"
+msgstr "Set the game score"
 
 #: src/modes/classic/definition/commands.ts:30
 #: src/modes/flag/definition/commands.ts:15
@@ -1947,7 +1948,7 @@ msgstr "turnover on downs."
 
 #: src/modes/classic/states/extra-point/extra-point-quarterback-run.ts:111
 #: src/modes/classic/states/extra-point/extra-point-run.ts:125
-#: src/modes/classic/states/extra-point/extra-point.ts:324
+#: src/modes/classic/states/extra-point/extra-point.ts:321
 msgid "TWO POINTS!"
 msgstr "TWO POINTS!"
 
@@ -1972,7 +1973,7 @@ msgstr "two-point try failed."
 msgid "two-point try is good!"
 msgstr "two-point try is good!"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:387
+#: src/modes/classic/states/extra-point/extra-point.ts:384
 msgid "two-point try is no longer available."
 msgstr "two-point try is no longer available."
 
@@ -1987,7 +1988,7 @@ msgstr "Undo the last play"
 msgid "Victory for the {0} team!"
 msgstr "Victory for the {0} team!"
 
-#: src/modes/classic/definition/commands.ts:60
+#: src/modes/classic/definition/commands.ts:65
 #: src/modes/flag/definition/commands.ts:40
 msgid "View or set a config flag"
 msgstr "View or set a config flag"
