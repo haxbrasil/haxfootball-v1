@@ -272,8 +272,8 @@ msgid "↩️ Miss. Your lane reset to 10 targets."
 msgstr "↩️ Miss. Your lane reset to 10 targets."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/shared/commands/handlers/undo.ts:26
-#: src/modes/flag/shared/commands/handlers/undo.ts:26
+#: src/modes/classic/shared/commands/handlers/undo.ts:40
+#: src/modes/flag/shared/commands/handlers/undo.ts:40
 msgid "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 
@@ -368,6 +368,11 @@ msgstr "⚙️ Available flags:"
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Available flags: {0}."
 
+#: src/modes/classic/shared/commands/handlers/undo.ts:30
+#: src/modes/flag/shared/commands/handlers/undo.ts:30
+msgid "⚠️ Another admin just called for an undo. Please wait a moment."
+msgstr "⚠️ Another admin just called for an undo. Please wait a moment."
+
 #: src/modes/classic/states/scrimmage/presnap.ts:607
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal is only available from the defensive side of the field."
@@ -390,8 +395,8 @@ msgstr "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgid "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
 msgstr "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
 
-#: src/modes/classic/shared/commands/handlers/undo.ts:18
-#: src/modes/flag/shared/commands/handlers/undo.ts:18
+#: src/modes/classic/shared/commands/handlers/undo.ts:21
+#: src/modes/flag/shared/commands/handlers/undo.ts:21
 msgid "⚠️ No checkpoints available to undo."
 msgstr "⚠️ No checkpoints available to undo."
 
@@ -407,8 +412,8 @@ msgstr "⚠️ No quarterback selected. Use !qb to become QB before the {HIKE_TI
 msgid "⚠️ Only admins can assign quarterback targets."
 msgstr "⚠️ Only admins can assign quarterback targets."
 
-#: src/modes/classic/shared/commands/handlers/undo.ts:8
-#: src/modes/flag/shared/commands/handlers/undo.ts:8
+#: src/modes/classic/shared/commands/handlers/undo.ts:11
+#: src/modes/flag/shared/commands/handlers/undo.ts:11
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Only admins can call for an undo."
 
