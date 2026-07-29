@@ -283,6 +283,29 @@ describe("node-haxball compatibility adapter", () => {
             1,
         );
     });
+
+    it("normalizes node-haxball's minute time limit to seconds", async () => {
+        Object.assign(nodeHaxball.room, {
+            gameState: {
+                redScore: 0,
+                blueScore: 0,
+                timeElapsed: 10,
+                scoreLimit: 0,
+                timeLimit: 10,
+            },
+        });
+        const room = await createRoom();
+
+        expect(room.getScores()).toEqual({
+            red: 0,
+            blue: 0,
+            time: 10,
+            scoreLimit: 0,
+            timeLimit: 600,
+        });
+
+        Object.assign(nodeHaxball.room, { gameState: null });
+    });
 });
 
 async function createRoom(): Promise<RoomObject> {
