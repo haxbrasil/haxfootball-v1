@@ -596,10 +596,6 @@ export function flushRuntime(): {
             mutations.queuePlayerDisc(player, props),
         setDiscProperties: (discIndex: DiscRef, props: DiscProps) =>
             mutations.queueDisc(discIndex, props),
-        patchStadium: (
-            patch: Parameters<Room["patchStadium"]>[0],
-            options?: Parameters<Room["patchStadium"]>[1],
-        ) => room.patchStadium(patch, options),
         setAvatar: (player: PlayerRef, avatar: AvatarValue) =>
             mutations.queueAvatar(player, avatar),
         setTeam: (player: PlayerRef, team: TeamValue) =>

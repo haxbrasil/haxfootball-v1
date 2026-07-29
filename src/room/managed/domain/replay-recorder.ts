@@ -4,7 +4,9 @@ export class ReplayRecorder {
     private recording = false;
 
     start(room: Room): void {
-        if (this.recording) return;
+        if (this.recording) {
+            room.stopRecording();
+        }
 
         try {
             this.recording = room.startRecording();
@@ -18,16 +20,15 @@ export class ReplayRecorder {
         }
     }
 
-    snapshot(room: Room): Uint8Array | null {
+    stop(room: Room): Uint8Array | null {
         if (!this.recording) return null;
 
+        this.recording = false;
+
         try {
-            return room.snapshotRecording();
+            return room.stopRecording();
         } catch (error) {
-            console.error(
-                "Failed to snapshot HaxBall replay recording:",
-                error,
-            );
+            console.error("Failed to stop HaxBall replay recording:", error);
             return null;
         }
     }

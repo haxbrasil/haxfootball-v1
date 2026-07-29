@@ -28,8 +28,9 @@ afterEach(() => {
     vi.useRealTimers();
 });
 
-describe("managed match persistence callback safety", () => {
-    it("does not stop the replay inside the game-stop callback", () => {
+describe("managed match persistence recording lifecycle", () => {
+    it("stops the replay when the game stops", async () => {
+        installSuccessfulRequests();
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -39,10 +40,16 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onGameStop", room, null);
 
-        expect(stopRecording).not.toHaveBeenCalled();
+        expect(stopRecording).toHaveBeenCalledOnce();
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
     });
 
-    it("does not stop the replay inside the last-player-leave callback", () => {
+    it("stops the replay when the last player leaves", async () => {
+        installSuccessfulRequests();
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -58,7 +65,12 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onPlayerLeave", room, player);
 
-        expect(stopRecording).not.toHaveBeenCalled();
+        expect(stopRecording).toHaveBeenCalledOnce();
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
     });
 
     it("creates a pending match immediately and discards a short game", async () => {
@@ -90,10 +102,10 @@ describe("managed match persistence callback safety", () => {
 
     it("checkpoints and completes an eligible match with its recording", async () => {
         installSuccessfulRequests();
-        const snapshotRecording = vi.fn<() => Uint8Array>(() =>
+        const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
-        const room = createRoom({ time: 31, snapshotRecording });
+        const room = createRoom({ time: 31, stopRecording });
         const persistence = createPersistence();
 
         persistence.module.call("onGameStart", room, null);
@@ -110,7 +122,7 @@ describe("managed match persistence callback safety", () => {
         });
 
         expect(recordingCheckpointRequests()).toHaveLength(1);
-        expect(snapshotRecording).toHaveBeenCalledOnce();
+        expect(stopRecording).toHaveBeenCalledOnce();
     });
 });
 
@@ -125,11 +137,9 @@ function createPersistence() {
 
 function createRoom({
     time,
-    snapshotRecording = vi.fn<() => Uint8Array>(() => Uint8Array.from([1, 2])),
     stopRecording = vi.fn<() => Uint8Array>(() => Uint8Array.from([1, 2, 3])),
 }: {
     time: number;
-    snapshotRecording?: () => Uint8Array;
     stopRecording?: () => Uint8Array;
 }): Room {
     return {
@@ -143,7 +153,6 @@ function createRoom({
         }),
         send: vi.fn<() => void>(),
         startRecording: vi.fn<() => boolean>(() => true),
-        snapshotRecording,
         stopRecording,
     } as unknown as Room;
 }

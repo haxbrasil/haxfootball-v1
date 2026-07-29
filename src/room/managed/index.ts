@@ -17,10 +17,6 @@ import {
 } from "./modules/live-state";
 import { createManagedMatchPersistence } from "./modules/match-persistence";
 import {
-    createManagedIncidentModule,
-    type RoomIncidentReporter,
-} from "./modules/incidents";
-import {
     createManagedRoomEvents,
     createManagedRoomManagerEventSink,
 } from "./modules/room-events";
@@ -29,7 +25,6 @@ type ManagedRoomModulesOptions = {
     allowGuestPlay?: boolean | undefined;
     autoManageNativeAdmins?: boolean | undefined;
     commId?: string | undefined;
-    incidentReporter?: RoomIncidentReporter | undefined;
     liveStateContractJson?: string | undefined;
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
@@ -86,11 +81,6 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         roomId: options.roomId,
         sessionStore,
     });
-    const incidents = options.incidentReporter
-        ? createManagedIncidentModule({
-              reporter: options.incidentReporter,
-          })
-        : null;
     const liveStateOptions =
         options.commId && options.roomId
             ? {
@@ -124,7 +114,6 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         roomEvents,
         matchPersistence.module,
         ...sharedModules,
-        ...(incidents ? [incidents] : []),
         ...(liveState ? [liveState] : []),
         ...(lifecycle ? [lifecycle] : []),
     );

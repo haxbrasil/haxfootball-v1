@@ -9,10 +9,6 @@ import {
     parseCommandMessage,
 } from "@core/commands";
 import { Room } from "@core/room";
-import type {
-    IncidentRecord,
-    IncidentRecorder,
-} from "@room/shared/domain/incidents";
 
 export type StadiumChangeHandlerResponse = {
     undo?: boolean;
@@ -274,13 +270,6 @@ export class Module {
         return this;
     }
 
-    onDeferredOperationApplied(
-        handler: (room: Room, event: DeferredOperationAppliedObject) => void,
-    ): this {
-        this.events.push(["onDeferredOperationApplied", handler]);
-        return this;
-    }
-
     call(eventName: string, ...args: any[]): boolean {
         for (const [name, handler] of this.events) {
             if (name === eventName) {
@@ -341,57 +330,9 @@ export function createModule() {
     return new Module();
 }
 
-type UpdateRoomModulesOptions = {
-    incidents?: IncidentRecorder;
-    incidentLevel?: "normal" | "full";
-};
-
-type RoomWithOptionalLiveTrace = RoomObject & {
-    getLiveTraceRecords?: () => readonly IncidentRecord[];
-};
-
-export function updateRoomModules(
-    roomObject: RoomObject,
-    modules: Module[],
-    options: UpdateRoomModulesOptions = {},
-) {
-    if (options.incidents) {
-        roomObject.onRoomOperation = (operation) => {
-            options.incidents?.record("room-operation", { ...operation });
-        };
-    }
-
+export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
     const room = new Room(roomObject);
     let ignoreNextStadiumUndo = false;
-
-    options.incidents?.setSnapshotProvider(() => ({
-        scores: room.getScores(),
-        ball: room.getBallPosition(),
-        discCount: room.getDiscCount(),
-        players: room.getPlayerList().map((player) => ({
-            id: player.id,
-            name: player.name,
-            team: player.team,
-            admin: player.admin,
-            position: player.position ?? null,
-        })),
-    }));
-
-    if (options.incidents) {
-        if (options.incidentLevel === "full") {
-            const traceRoom: RoomWithOptionalLiveTrace = roomObject;
-
-            options.incidents.setExtraRecordsProvider((kind) => {
-                if (kind !== "desync") {
-                    return [];
-                }
-
-                return traceRoom.getLiveTraceRecords?.() ?? [];
-            });
-        } else {
-            options.incidents.setExtraRecordsProvider(null);
-        }
-    }
 
     const commandConfigs = modules
         .map((module) => module.getCommandConfig())
@@ -646,5 +587,4 @@ export function updateRoomModules(
     roomObject.onStadiumChange = emitStadiumChange();
     roomObject.onRoomLink = emit("onRoomLink");
     roomObject.onKickRateLimitSet = emit("onKickRateLimitSet");
-    roomObject.onDeferredOperationApplied = emit("onDeferredOperationApplied");
 }

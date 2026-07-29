@@ -458,18 +458,6 @@ export class Room {
         return this.room.getGameStatus();
     }
 
-    public setScore(red: number, blue: number): void {
-        this.room.setScore(red, blue);
-    }
-
-    public setDesyncCheckerEnabled(enabled: boolean): void {
-        this.room.setDesyncCheckerEnabled(enabled);
-    }
-
-    public setDesyncCheckerIntervalTicks(intervalTicks: number): void {
-        this.room.setDesyncCheckerIntervalTicks(intervalTicks);
-    }
-
     public setScoreLimit(limit: number): void {
         this.room.setScoreLimit(limit);
     }
@@ -602,7 +590,9 @@ export class Room {
             return this.discPropsCache.get(discIndex) ?? null;
         }
 
-        const value = this.room.getDiscProperties(discIndex);
+        const value = this.room.getDiscProperties(
+            this.resolveDiscRef(discIndex),
+        );
         this.discPropsCache.set(discIndex, value);
         return value;
     }
@@ -611,16 +601,8 @@ export class Room {
         discIndex: DiscRef,
         properties: DiscPropertiesObject,
     ): void {
-        this.room.setDiscProperties(discIndex, properties);
+        this.room.setDiscProperties(this.resolveDiscRef(discIndex), properties);
         this.invalidateDiscCache(discIndex);
-    }
-
-    public patchStadium(
-        patch: unknown,
-        options?: PatchStadiumOptionsObject,
-    ): void {
-        this.room.patchStadium(patch, options);
-        this.discPropsCache.clear();
     }
 
     public getPlayerDiscProperties(
@@ -660,16 +642,11 @@ export class Room {
     }
 
     public startRecording(): boolean {
-        this.room.startRecording();
-        return true;
+        return this.room.startRecording();
     }
 
     public stopRecording(): Uint8Array | null {
         return this.room.stopRecording();
-    }
-
-    public snapshotRecording(): Uint8Array | null {
-        return this.room.snapshotRecording();
     }
 
     public dispatch(
@@ -689,29 +666,11 @@ export class Room {
     ): DispatchedPlayerIdentity | null | void {
         const result = this.room.dispatch(operation as never);
 
-        switch (operation.type) {
-            case "playerJoin":
-            case "playerLeave":
-            case "playerTeam":
-            case "playerAvatar":
-            case "playerAdmin":
-            case "teamsLock":
-            case "autoTeams":
-            case "reorderPlayers":
-                this.invalidatePlayerListCache();
-                break;
-            case "kickPlayer":
-            case "startGame":
-            case "stopGame":
-            case "pauseGame":
-            case "customStadium":
-            case "defaultStadium":
-                this.invalidateCaches();
-                break;
-        }
-
-        if (operation.type === "playerTeam") {
-            this.invalidatePlayerDiscCache(operation.playerId);
+        if (
+            operation.type === "playerJoin" ||
+            operation.type === "playerLeave"
+        ) {
+            this.invalidatePlayerListCache();
         }
 
         return result ?? null;
@@ -734,6 +693,21 @@ export class Room {
             conn: identity.conn,
             auth: identity.auth,
         });
+    }
+
+    private resolveDiscRef(discRef: DiscRef): number {
+        if (typeof discRef === "number") return discRef;
+
+        if (this.currentStadium?.kind === "custom") {
+            const index =
+                this.currentStadium.stadium.discs?.findIndex(
+                    (disc) => disc.ref === discRef,
+                ) ?? -1;
+
+            if (index >= 0) return index + 1;
+        }
+
+        throw new Error(`Unknown stadium disc reference: ${discRef}`);
     }
 
     public get collisionFlags(): CollisionFlagsObject {

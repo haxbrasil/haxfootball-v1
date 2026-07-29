@@ -27,7 +27,6 @@ import { t } from "@lingui/core/macro";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
 const CHECKPOINT_INTERVAL_SECONDS = 2;
-const RECORDING_CHECKPOINT_INTERVAL_SECONDS = 10;
 const TERMINAL_RETRY_DELAY_MS = 5_000;
 
 type MatchScore = {
@@ -55,7 +54,7 @@ type MatchSession = {
     recordingRevision: number;
     nextProducerSequence: number;
     lastCheckpointScheduledElapsed: number;
-    lastRecordingScheduledElapsed: number;
+    replayBytes: Uint8Array | null;
     events: CheckpointEvent[];
     gameEvents: RuntimeMatchEvent[];
     playerIds: Map<number, string>;
@@ -116,21 +115,6 @@ export function createManagedMatchPersistence({
         });
     };
 
-    const scheduleRecordingCheckpoint = (
-        room: Room,
-        currentSession: MatchSession,
-        finalBytes?: Uint8Array | null,
-    ): void => {
-        enqueue(async () => {
-            await ensureMatch(currentSession, roomId);
-            const bytes = finalBytes ?? currentSession.replay.snapshot(room);
-
-            if (bytes) {
-                await uploadRecordingCheckpoint(currentSession, bytes);
-            }
-        });
-    };
-
     const finishSession = (room: Room, currentSession: MatchSession): void => {
         if (session === currentSession) {
             session = null;
@@ -143,6 +127,7 @@ export function createManagedMatchPersistence({
             gameScoreReader,
             currentSession.lastScore,
         );
+        currentSession.replayBytes ??= currentSession.replay.stop(room);
         const elapsedSeconds = getElapsedSeconds(currentSession);
 
         const persistFinishedSession = async (): Promise<void> => {
@@ -179,12 +164,10 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            const replayBytes = currentSession.replay.snapshot(room);
-
-            if (replayBytes) {
+            if (currentSession.replayBytes) {
                 const uploaded = await uploadRecordingCheckpoint(
                     currentSession,
-                    replayBytes,
+                    currentSession.replayBytes,
                 );
 
                 if (!uploaded) {
@@ -242,7 +225,7 @@ export function createManagedMatchPersistence({
                 recordingRevision: 0,
                 nextProducerSequence: 1,
                 lastCheckpointScheduledElapsed: Number.NEGATIVE_INFINITY,
-                lastRecordingScheduledElapsed: Number.NEGATIVE_INFINITY,
+                replayBytes: null,
                 events: [],
                 gameEvents: [],
                 playerIds: new Map(),
@@ -283,15 +266,6 @@ export function createManagedMatchPersistence({
             ) {
                 currentSession.lastCheckpointScheduledElapsed = elapsedSeconds;
                 scheduleCheckpoint(room, currentSession, status);
-            }
-
-            if (
-                elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS &&
-                elapsedSeconds - currentSession.lastRecordingScheduledElapsed >=
-                    RECORDING_CHECKPOINT_INTERVAL_SECONDS
-            ) {
-                currentSession.lastRecordingScheduledElapsed = elapsedSeconds;
-                scheduleRecordingCheckpoint(room, currentSession);
             }
         })
         .onPlayerJoin((room, player) => {

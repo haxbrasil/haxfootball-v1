@@ -32,7 +32,6 @@ export interface StateApi {
         player: PlayerObject,
         command: CommandSpec,
     ) => CommandHandleResult | void;
-    deferredOperationApplied?: (event: DeferredOperationAppliedEvent) => void;
     inspect?: () => GameStateInspection;
 }
 
@@ -84,11 +83,6 @@ export type ChatHandleResult = {
     sentBeforeHooks: boolean;
 };
 
-export type DeferredOperationAppliedEvent = {
-    operationId: string;
-    operationType: string;
-};
-
 export interface Engine<Cfg = unknown> {
     start: (name: string, params?: any) => void;
     stop: () => void;
@@ -110,9 +104,6 @@ export interface Engine<Cfg = unknown> {
         byPlayer: PlayerObject | null,
     ) => void;
     handlePlayerLeave: (player: PlayerObject) => void;
-    handleDeferredOperationApplied: (
-        event: DeferredOperationAppliedEvent,
-    ) => void;
     getGlobalStateSnapshot: <State = unknown>() => State | null;
     getCurrentStateName: () => string | null;
     getInspection: () => GameStateInspection | null;
@@ -1265,26 +1256,6 @@ export function createEngine<Cfg>(
         }
     }
 
-    function handleDeferredOperationApplied(
-        event: DeferredOperationAppliedEvent,
-    ): void {
-        if (!running || !current || !current.api.deferredOperationApplied) {
-            return;
-        }
-
-        runOutsideTick(
-            () => {
-                current!.api.deferredOperationApplied!(event);
-            },
-            {
-                allowTransition: true,
-                disposals: current.disposals,
-                checkpointDrafts: current.checkpointDrafts,
-                beforeGameState: lastGameState,
-            },
-        );
-    }
-
     function isRunning() {
         return running;
     }
@@ -1346,7 +1317,6 @@ export function createEngine<Cfg>(
         handlePlayerCommand,
         handlePlayerTeamChange,
         handlePlayerLeave,
-        handleDeferredOperationApplied,
         getGlobalStateSnapshot,
         getCurrentStateName,
         getInspection,

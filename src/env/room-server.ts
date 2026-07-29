@@ -27,17 +27,6 @@ const roomServerBaseEnvSchema = {
     __ROOM_API_JWT: z.string().trim().min(1).optional(),
     ROOM_API_JWT: z.string().trim().min(1).optional(),
     ROOM_LIVE_STATE_CONTRACT_JSON: z.string().trim().min(1).optional(),
-    HAXFOOTBALL_INCIDENT_BUFFER_SECONDS: z.coerce
-        .number()
-        .int()
-        .positive()
-        .optional(),
-    HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS: z.coerce
-        .number()
-        .int()
-        .positive()
-        .optional(),
-    HAXFOOTBALL_INCIDENT_LEVEL: z.enum(["normal", "full"]).default("normal"),
 } satisfies z.ZodRawShape;
 
 const roomServerEnvSchema = z.object(roomServerBaseEnvSchema).and(
@@ -92,11 +81,6 @@ export const env = createEnv(
                 ? { apiReadiness: { roomId, commId, apiUrl, apiJwt } }
                 : {}),
             liveStateContractJson: rawEnv.ROOM_LIVE_STATE_CONTRACT_JSON,
-            incidentBuffer: {
-                seconds: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_SECONDS,
-                maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,
-            },
-            incidentLevel: rawEnv.HAXFOOTBALL_INCIDENT_LEVEL,
             roomManagerEnabled: rawEnv.ROOM_MANAGER_ENABLED,
             roomManagerAfkActivityDetectionEnabled:
                 rawEnv.ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED,

@@ -8,7 +8,6 @@ export const CLASSIC_COMMAND = {
     INFO: "info",
     REPOSITION: "reposition",
     SCORE: "score",
-    SET_SCORE: "setscore",
     QUARTERBACK: "qb",
     FLAG: "flag",
     FLAGS: "flags",
@@ -18,7 +17,6 @@ export const SHARED_COMMAND_NAMES = [
     CLASSIC_COMMAND.UNDO,
     CLASSIC_COMMAND.INFO,
     CLASSIC_COMMAND.SCORE,
-    CLASSIC_COMMAND.SET_SCORE,
     CLASSIC_COMMAND.QUARTERBACK,
 ] as const;
 

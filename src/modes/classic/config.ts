@@ -12,22 +12,11 @@ export const {
 } = ConfigUtils.createConfig({
     defaultConfig: {
         flags: {
-            losBlocking: true,
             requireQb: true,
             timeouts: true,
         },
     },
     flags: {
-        LOS_BLOCKING: {
-            description: t`Blocks player crossings over the LOS during presnap and punt positioning.`,
-            getValue: (config) => config.flags.losBlocking,
-            setValue: (config, value) => {
-                config.flags = {
-                    ...config.flags,
-                    losBlocking: value,
-                };
-            },
-        },
         REQUIRE_QB: {
             description: t`Requires a selected quarterback before the offense can snap.`,
             getValue: (config) => config.flags.requireQb,

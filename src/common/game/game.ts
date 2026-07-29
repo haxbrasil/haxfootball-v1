@@ -17,6 +17,25 @@ export function opposite(t: FieldTeam): FieldTeam {
     return t === Team.RED ? Team.BLUE : Team.RED;
 }
 
+export function isPastOwnLineOfScrimmage({
+    offensiveTeam,
+    playerTeam,
+    playerX,
+    lineX,
+}: {
+    offensiveTeam: FieldTeam;
+    playerTeam: FieldTeam;
+    playerX: number;
+    lineX: number;
+}): boolean {
+    const directionalOffset =
+        (playerX - lineX) * (offensiveTeam === Team.RED ? 1 : -1);
+
+    return playerTeam === offensiveTeam
+        ? directionalOffset > 0
+        : directionalOffset < 0;
+}
+
 export type FieldPosition = { yards: number; side: FieldTeam };
 export type ScoreState = Record<FieldTeam, number>;
 

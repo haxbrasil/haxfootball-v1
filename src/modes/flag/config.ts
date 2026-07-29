@@ -12,21 +12,10 @@ export const {
 } = ConfigUtils.createConfig({
     defaultConfig: {
         flags: {
-            losBlocking: true,
             timeouts: true,
         },
     },
     flags: {
-        LOS_BLOCKING: {
-            description: t`Blocks player crossings over the LOS during presnap positioning.`,
-            getValue: (config) => config.flags.losBlocking,
-            setValue: (config, value) => {
-                config.flags = {
-                    ...config.flags,
-                    losBlocking: value,
-                };
-            },
-        },
         TIMEOUTS: {
             description: t`Enables the hike timeout.`,
             getValue: (config) => config.flags.timeouts,

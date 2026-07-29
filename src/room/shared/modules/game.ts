@@ -8,7 +8,7 @@ import { COLOR } from "@common/general/color";
 import type { RoomAuthorization } from "../domain/authorization";
 import { type GameModeName, type GameModeStore } from "../domain/game-mode";
 import type { PlayerSessionReader } from "../domain/player-sessions";
-import type { GameScore, GameScoreStore } from "../domain/game-score";
+import type { GameScoreStore } from "../domain/game-score";
 import { applyGameModeRoomSettings } from "../domain/game-mode-room-settings";
 import {
     GAME_MODE_LIST,
@@ -65,40 +65,14 @@ export function createGameModule({
 
     let engine: Engine<unknown> | null = null;
     let activeMode: GameModeName | null = null;
-    const visualScore = { lastSent: null as GameScore | null };
-
     const syncGameScore = () => {
         if (!activeMode) return;
 
         modeRuntimes[activeMode].syncGameScore(engine, gameScoreStore);
     };
 
-    const syncVisualScore = (room: Room) => {
-        const score = gameScoreStore?.get() ?? null;
-
-        if (!score) {
-            visualScore.lastSent = null;
-            return;
-        }
-
-        if (
-            visualScore.lastSent?.red === score.red &&
-            visualScore.lastSent.blue === score.blue
-        ) {
-            return;
-        }
-
-        room.setScore(score.red, score.blue);
-
-        visualScore.lastSent = {
-            red: score.red,
-            blue: score.blue,
-        };
-    };
-
-    const syncScores = (room: Room) => {
+    const syncScores = (_room: Room) => {
         syncGameScore();
-        syncVisualScore(room);
     };
 
     const getSelectedModeDefinition = () =>
@@ -158,7 +132,6 @@ export function createGameModule({
         engine = null;
         activeMode = null;
         gameScoreStore?.reset();
-        visualScore.lastSent = null;
         gameRuntimeStore?.reset(
             createIdleGameRuntimeSnapshot(
                 getSelectedModeDefinition().name,
@@ -185,7 +158,6 @@ export function createGameModule({
                 return;
             }
 
-            visualScore.lastSent = null;
             activeMode = mode.name;
             engine = createEngine(
                 room,
@@ -337,9 +309,6 @@ export function createGameModule({
         .onGameUnpause((_room, byPlayer) => {
             engine?.handleGameUnpause(byPlayer);
             writeGameRuntimeSnapshot();
-        })
-        .onDeferredOperationApplied((_room, event) => {
-            engine?.handleDeferredOperationApplied(event);
         })
         .onRoomLink((room) => {
             applySelectedModeRoomSettings(room);

@@ -1,14 +1,11 @@
 {
-    "name": "@haxbrasil/haxfootball",
-    "version": "1.0.94",
-    "description": "HaxBall headless room package for room-server",
-    "packageManager": "pnpm@11.0.9",
+    "name": "@haxbrasil/haxfootball-v1",
+    "version": "1.0.0",
+    "description": "HaxFootball 1 headless room package powered by node-haxball",
+    "packageManager": "pnpm@11.10.0",
     "main": "dist/environments/room-server.js",
     "files": [
         "dist"
-    ],
-    "bundledDependencies": [
-        "@haxbrasil/haxball-rs"
     ],
     "scripts": {
         "start:node": "node ./dist/environments/node.js",
@@ -47,11 +44,12 @@
         "vitest": "^4.1.6"
     },
     "dependencies": {
-        "@haxbrasil/haxball-rs": "0.2.27",
         "@haxbrasil/haxfootball-api-sdk": "github:haxbrasil/haxfootball-api-sdk#8868d1c9c3b36758179217a2159dfe8f0ec97080",
         "@lingui/core": "^5.9.5",
         "@peculiar/webcrypto": "^1.5.0",
+        "https-proxy-agent": "^7.0.6",
         "json5": "^2.2.3",
+        "node-haxball": "2.3.1",
         "pako": "^2.1.0",
         "ws": "^8.20.1",
         "zod": "^4.4.3",

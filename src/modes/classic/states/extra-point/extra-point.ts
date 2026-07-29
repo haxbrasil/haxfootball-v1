@@ -6,12 +6,10 @@ import {
     $effect,
     $isGamePaused,
     $next,
-    $stateInstanceKey,
     $tick,
-    $config,
 } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
-import { opposite } from "@common/game/game";
+import { isPastOwnLineOfScrimmage, opposite } from "@common/game/game";
 import { getDistance } from "@common/math/geometry";
 import { type FieldTeam, isFieldTeam } from "@runtime/models";
 import { t } from "@lingui/core/macro";
@@ -48,11 +46,6 @@ import {
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/rules/snap";
 import type { GameStateInspection } from "@runtime/inspection";
-import {
-    $requestLineOfScrimmageBlocking,
-    $setLineOfScrimmageBlockingCollision,
-} from "@modes/classic/hooks/los";
-import { type Config } from "@modes/classic/config";
 
 const LOADING_DURATION = ticks({ seconds: 0.5 });
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
@@ -126,8 +119,6 @@ export function ExtraPoint({
         yards: EXTRA_POINT_YARD_LINE,
         side: opposite(offensiveTeam),
     };
-    const losBlockingOperationId = `classic-extra-point-los:${$stateInstanceKey()}`;
-    const config = $config<Config>();
     const lineOfScrimmageX = getPositionFromFieldPosition(fieldPos);
     const ballPosWithOffset = calculateSnapBallPosition(
         offensiveTeam,
@@ -137,9 +128,6 @@ export function ExtraPoint({
     const formationBallPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
     $setLineOfScrimmage(fieldPos);
-    if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
-    }
     $unsetFirstDownLine();
     $setBallActive();
     $setBallUnmoveable();
@@ -154,10 +142,6 @@ export function ExtraPoint({
         $unsetFirstDownLine();
         $setBallActive();
         $setBallMoveable();
-
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(false);
-        }
     });
 
     $checkpoint({
@@ -207,6 +191,35 @@ export function ExtraPoint({
                 $.send({
                     message: t`⚠️ You are too far from the ball to snap it.`,
                     to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return;
+        }
+
+        const defensivePlayersPastLine = $before().players.filter(
+            (statePlayer) =>
+                statePlayer.team === opposite(offensiveTeam) &&
+                isPastOwnLineOfScrimmage({
+                    offensiveTeam,
+                    playerTeam: statePlayer.team,
+                    playerX: statePlayer.x,
+                    lineX: lineOfScrimmageX,
+                }),
+        );
+
+        if (defensivePlayersPastLine.length > 0) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ You cannot snap while a defensive player is past the LOS.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+                $.send({
+                    message: t`⚠️ You must get back behind the line of scrimmage to allow the snap!`,
+                    to: defensivePlayersPastLine,
+                    sound: "notification",
                     color: COLOR.CRITICAL,
                 });
             });
@@ -397,27 +410,13 @@ export function ExtraPoint({
         $handleOffenseCrossedLine(frame);
     }
 
-    function deferredOperationApplied(event: {
-        operationId: string;
-        operationType: string;
-    }) {
-        if (event.operationId !== losBlockingOperationId) return;
-        if (event.operationType !== "patchStadium") return;
-
-        $setLineOfScrimmageBlockingCollision(true);
-    }
-
     function join(_player: GameStatePlayer) {
         $setInitialPlayerPositions(offensiveTeam, formationBallPos);
-
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(true);
-        }
     }
 
     function inspect(): GameStateInspection {
         return { continuity: "before-play-start" };
     }
 
-    return { run, chat, command, join, deferredOperationApplied, inspect };
+    return { run, chat, command, join, inspect };
 }

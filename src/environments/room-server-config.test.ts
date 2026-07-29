@@ -72,8 +72,6 @@ function environment(
         maxPlayers: 25,
         noPlayer: true,
         roomToken: "token",
-        incidentBuffer: {},
-        incidentLevel: "normal",
         ...overrides,
     } as RoomServerEnvironment;
 }

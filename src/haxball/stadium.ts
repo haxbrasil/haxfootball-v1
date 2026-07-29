@@ -68,7 +68,7 @@ export type CollisionFlag =
  * Vertex - a point which can collide with discs but cannot move and is not visible.
  */
 export interface Vertex {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** The x position for the vertex */
     x: number;
@@ -88,7 +88,7 @@ export interface Vertex {
  * Segment - a line (curved or straight) that connects two vertexes.
  */
 export interface Segment {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** Index of a vertex in the stadium vertex list to be used as first point of the segment */
     v0: number;
@@ -118,7 +118,7 @@ export interface Segment {
  * Goal - lines belonging to a team, when the ball crosses this line the opposite team scores.
  */
 export interface Goal {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** The coordinates of the first point of the line in an array form [x, y] */
     p0: Pair<number>;
@@ -134,7 +134,7 @@ export interface Goal {
  * Plane - collision objects that divide the map in two by an infinite line.
  */
 export interface Plane {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** The direction vector of the plane in an array form [x, y] */
     normal: Pair<number>;
@@ -154,7 +154,7 @@ export interface Plane {
  * Disc - circular physical objects that are placed in the stadium.
  */
 export interface Disc {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** The starting position of the object in array form [x, y] */
     pos?: Pair<number>;
@@ -212,7 +212,7 @@ export interface PlayerPhysics {
  * Joint - physical connections between two Discs.
  */
 export interface Joint {
-    /** Stable server-side reference for haxball-rs stadium patches */
+    /** Stable server-side reference for runtime stadium lookups */
     ref?: string;
     /** Index of one of the two discs connected by the joint */
     d0: number;

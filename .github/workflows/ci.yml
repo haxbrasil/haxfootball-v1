@@ -7,7 +7,6 @@ on:
 
 permissions:
     contents: read
-    packages: read
 
 jobs:
     checks:
@@ -30,11 +29,6 @@ jobs:
 
             - name: Setup pnpm
               run: corepack enable
-
-            - name: Configure GitHub Packages authentication
-              env:
-                  GITHUB_TOKEN: ${{ github.token }}
-              run: npm config set //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN" --location=user
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile

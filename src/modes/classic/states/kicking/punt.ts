@@ -5,7 +5,7 @@ import { opposite } from "@common/game/game";
 import { ticks } from "@common/general/time";
 import { t } from "@lingui/core/macro";
 import { $dispose, $effect } from "@runtime/hooks";
-import { $config, $next, $stateInstanceKey, $tick } from "@runtime/runtime";
+import { $config, $next, $tick } from "@runtime/runtime";
 import {
     $lockBall,
     $setBallKickForce,
@@ -32,10 +32,6 @@ import { cn } from "@modes/classic/shared/presentation/message";
 import { PUNT_KICK_TIMEOUT_TICKS } from "@modes/classic/shared/rules/punt";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
 import type { GameStateInspection } from "@runtime/inspection";
-import {
-    $requestLineOfScrimmageBlocking,
-    $setLineOfScrimmageBlockingCollision,
-} from "@modes/classic/hooks/los";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {
     start: { x: -50, y: -150 },
@@ -46,12 +42,6 @@ export function Punt({ downState }: { downState: DownState }) {
     const { offensiveTeam, fieldPos } = downState;
     const kickingTeam: FieldTeam = offensiveTeam;
     const config = $config<Config>();
-    const losBlockingOperationId = `classic-punt-los:${$stateInstanceKey()}`;
-
-    if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
-        $setLineOfScrimmageBlockingCollision(true);
-    }
     $trapTeamInEndZone(opposite(kickingTeam));
     $setBallKickForce("strong");
     $setBallUnmoveable();
@@ -97,10 +87,6 @@ export function Punt({ downState }: { downState: DownState }) {
     });
 
     $dispose(() => {
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(false);
-        }
-
         $untrapAllTeams();
         $setBallMoveable();
         $unlockBall();
@@ -211,10 +197,6 @@ export function Punt({ downState }: { downState: DownState }) {
     }
 
     function join(player: GameStatePlayer) {
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(true);
-        }
-
         if (player.team !== kickingTeam) {
             $trapPlayerInEndZone(player.id);
             return;
@@ -233,19 +215,9 @@ export function Punt({ downState }: { downState: DownState }) {
         });
     }
 
-    function deferredOperationApplied(event: {
-        operationId: string;
-        operationType: string;
-    }) {
-        if (event.operationId !== losBlockingOperationId) return;
-        if (event.operationType !== "patchStadium") return;
-
-        $setLineOfScrimmageBlockingCollision(true);
-    }
-
     function inspect(): GameStateInspection {
         return { continuity: "before-play-start" };
     }
 
-    return { run, command, join, deferredOperationApplied, inspect };
+    return { run, command, join, inspect };
 }

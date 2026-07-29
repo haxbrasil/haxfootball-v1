@@ -111,11 +111,25 @@ function operation(
     target: PlayerObject,
     message: Record<string, unknown> = {},
 ): RoomOperationObject {
+    if (kind === "player-team") {
+        return {
+            kind,
+            byPlayer: null,
+            targetPlayers: [target],
+            message: {
+                playerId: target.id,
+                team:
+                    typeof message["team"] === "number"
+                        ? (message["team"] as TeamID)
+                        : Team.SPECTATORS,
+            },
+        };
+    }
+
     return {
         kind,
-        rawType: 0,
         byPlayer: null,
         targetPlayers: [target],
-        message,
-    } as RoomOperationObject;
+        message: {},
+    };
 }

@@ -187,20 +187,7 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
             redSpawnPoints: [],
             blueSpawnPoints: [],
             points: [],
-            planes: [
-                {
-                    ref: "losBlocker.red",
-                    normal: [-1, 0],
-                    dist: -SPECIAL_HIDDEN_POSITION[0],
-                    cMask: ["redKO"],
-                },
-                {
-                    ref: "losBlocker.blue",
-                    normal: [1, 0],
-                    dist: -SPECIAL_HIDDEN_POSITION[0],
-                    cMask: ["blueKO"],
-                },
-            ],
+            planes: [],
             lines: [],
             dynamicLines: [
                 {

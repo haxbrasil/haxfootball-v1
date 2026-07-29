@@ -1,12 +1,11 @@
 import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
-import { opposite } from "@common/game/game";
+import { isPastOwnLineOfScrimmage, opposite } from "@common/game/game";
 import { parseIntegerInRange, parseTeamSide } from "@common/game/parsing";
 import { ticks } from "@common/general/time";
 import {
     BALL_OFFSET_YARDS,
-    calculateDirectionalGain,
     calculateSnapBallPosition,
     isInRedZone,
 } from "@modes/classic/shared/field";
@@ -18,7 +17,6 @@ import {
     $effect,
     $isGamePaused,
     $next,
-    $stateInstanceKey,
     $tick,
 } from "@runtime/runtime";
 import {
@@ -57,10 +55,6 @@ import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import { CLASSIC_COMMAND } from "@modes/classic/shared/commands/names";
 import { COLOR } from "@common/general/color";
 import { type Config } from "@modes/classic/config";
-import {
-    $requestLineOfScrimmageBlocking,
-    $setLineOfScrimmageBlockingCollision,
-} from "@modes/classic/hooks/los";
 import { BLITZ_BASE_DELAY_IN_SECONDS } from "@modes/classic/shared/rules/blitz";
 import {
     isTooFarFromBall,
@@ -139,8 +133,6 @@ function $setInitialPlayerPositions({
 
 export function Presnap({ downState }: { downState: DownState }) {
     const { offensiveTeam, downAndDistance, fieldPos } = downState;
-    const losBlockingOperationId = `classic-los:${$stateInstanceKey()}`;
-
     const initialState = $before();
     const initialPlayersSnapshot = initialState.players;
     const config = $config<Config>();
@@ -166,10 +158,6 @@ export function Presnap({ downState }: { downState: DownState }) {
     $setBallActive();
     $setLineOfScrimmage(fieldPos);
     $setFirstDownLine(offensiveTeam, fieldPos, downAndDistance.distance);
-    if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
-    }
-
     $effect(($) => {
         $.setBall({ ...ballPosWithOffset, xspeed: 0, yspeed: 0 });
     });
@@ -218,10 +206,6 @@ export function Presnap({ downState }: { downState: DownState }) {
         $unlockBall();
         $unsetLineOfScrimmage();
         $unsetFirstDownLine();
-
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(false);
-        }
     });
 
     $checkpoint({
@@ -235,10 +219,27 @@ export function Presnap({ downState }: { downState: DownState }) {
         return state.players.filter(
             (statePlayer) =>
                 statePlayer.team === offensiveTeam &&
-                calculateDirectionalGain(
+                isPastOwnLineOfScrimmage({
                     offensiveTeam,
-                    statePlayer.x - ballPos.x,
-                ) > 0,
+                    playerTeam: statePlayer.team,
+                    playerX: statePlayer.x,
+                    lineX: ballPos.x,
+                }),
+        );
+    }
+
+    function getDefensivePlayersBeyondLineOfScrimmage(): GameStatePlayer[] {
+        const state = $before();
+
+        return state.players.filter(
+            (statePlayer) =>
+                statePlayer.team === opposite(offensiveTeam) &&
+                isPastOwnLineOfScrimmage({
+                    offensiveTeam,
+                    playerTeam: statePlayer.team,
+                    playerX: statePlayer.x,
+                    lineX: ballPos.x,
+                }),
         );
     }
 
@@ -320,6 +321,28 @@ export function Presnap({ downState }: { downState: DownState }) {
             return false;
         }
 
+        const defensivePlayersPastLine =
+            getDefensivePlayersBeyondLineOfScrimmage();
+
+        if (defensivePlayersPastLine.length > 0) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ You cannot snap while a defensive player is past the LOS.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+
+                $.send({
+                    message: t`⚠️ You must get back behind the line of scrimmage to allow the snap!`,
+                    to: defensivePlayersPastLine,
+                    sound: "notification",
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return false;
+        }
+
         $effect(($) => {
             $.send({
                 message: cn(
@@ -359,10 +382,6 @@ export function Presnap({ downState }: { downState: DownState }) {
                 ? { quarterbackId: selectedQuarterbackId }
                 : {}),
         });
-
-        if (config.flags.losBlocking) {
-            $setLineOfScrimmageBlockingCollision(true);
-        }
     }
 
     function chat(player: PlayerObject, message: string): false | void {
@@ -837,19 +856,9 @@ export function Presnap({ downState }: { downState: DownState }) {
         }
     }
 
-    function deferredOperationApplied(event: {
-        operationId: string;
-        operationType: string;
-    }) {
-        if (event.operationId !== losBlockingOperationId) return;
-        if (event.operationType !== "patchStadium") return;
-
-        $setLineOfScrimmageBlockingCollision(true);
-    }
-
     function inspect(): GameStateInspection {
         return { continuity: "before-play-start" };
     }
 
-    return { run, chat, command, join, deferredOperationApplied, inspect };
+    return { run, chat, command, join, inspect };
 }

@@ -1,10 +1,12 @@
 # AGENTS.md
 
-This file is for coding agents working in the `haxfootball` room package repository. It applies to the whole repo.
+This file is for coding agents working in the `haxfootball-v1` room package repository. It applies to the whole repo.
 
 ## Project Snapshot
 
-`haxfootball` is a HaxBall headless room package for an American-football game mode. It builds a Node room entrypoint, opens a HaxBall room, wires room events into modules, and drives gameplay through a tick-based state engine.
+`haxfootball-v1` is the independently maintained HaxFootball 1 room package. It uses node-haxball, builds a Node room entrypoint, wires room events into modules, and drives gameplay through a tick-based state engine.
+
+HaxFootball 1 intentionally does not expose haxball-rs-only capabilities. Do not add dynamic LOS blockers, live trace buffers, native score mutation, recording snapshots, or desync-verifier configuration here. Presnap formation legality is enforced by rejecting the hike while either team has crossed its own side of the LOS. The separate `haxfootball` repository contains HaxFootball 2 and may make different engine-level choices.
 
 The package manager is pnpm. Do not introduce `package-lock.json`, do not use `npm version`, and do not switch scripts or docs to npm for development. The release artifact is still verified against npm install because the production API currently installs room packages with npm.
 
