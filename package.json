@@ -1,6 +1,6 @@
 {
     "name": "@haxbrasil/haxfootball-v1",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "HaxFootball 1 headless room package powered by node-haxball",
     "packageManager": "pnpm@11.10.0",
     "main": "dist/environments/room-server.js",
