@@ -39,6 +39,8 @@ const nodeHaxball = vi.hoisted(() => {
             disc: null,
         },
     ];
+    const afterTickCallbacks: (() => void)[] = [];
+    let deferAfterTick = false;
     const room = {
         players,
         gameState: null,
@@ -47,6 +49,8 @@ const nodeHaxball = vi.hoisted(() => {
         stopRecording: vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         ),
+        fakeSetGamePaused:
+            vi.fn<(pauseState: boolean, byPlayerId: number) => void>(),
         fakeSendPlayerInput: vi.fn<(input: number, playerId: number) => void>(),
         fakePlayerJoin:
             vi.fn<
@@ -139,11 +143,32 @@ const nodeHaxball = vi.hoisted(() => {
             getGeo: vi.fn<
                 () => Promise<{ lat: number; lon: number; flag: string }>
             >(),
-            runAfterGameTick: (callback: () => void) => callback(),
+            runAfterGameTick: (callback: () => void) => {
+                if (deferAfterTick) {
+                    afterTickCallbacks.push(callback);
+                    return;
+                }
+                callback();
+            },
         },
     };
 
-    return { api, OperationType, room };
+    return {
+        api,
+        OperationType,
+        room,
+        deferAfterTick(): void {
+            deferAfterTick = true;
+        },
+        flushAfterTick(): void {
+            deferAfterTick = false;
+            afterTickCallbacks.splice(0).forEach((callback) => callback());
+        },
+        resetAfterTick(): void {
+            deferAfterTick = false;
+            afterTickCallbacks.splice(0);
+        },
+    };
 });
 
 vi.mock("node-haxball", () => ({
@@ -154,6 +179,7 @@ import Haxball from "./game";
 
 beforeEach(() => {
     vi.clearAllMocks();
+    nodeHaxball.resetAfterTick();
 });
 
 describe("node-haxball compatibility adapter", () => {
@@ -305,6 +331,29 @@ describe("node-haxball compatibility adapter", () => {
         });
 
         Object.assign(nodeHaxball.room, { gameState: null });
+    });
+
+    it("preserves back-to-back pause state changes in the same tick", async () => {
+        const room = await createRoom();
+        nodeHaxball.deferAfterTick();
+
+        room.pauseGame(true);
+        room.pauseGame(false);
+
+        expect(nodeHaxball.room.fakeSetGamePaused).not.toHaveBeenCalled();
+
+        nodeHaxball.flushAfterTick();
+
+        expect(nodeHaxball.room.fakeSetGamePaused).toHaveBeenNthCalledWith(
+            1,
+            true,
+            0,
+        );
+        expect(nodeHaxball.room.fakeSetGamePaused).toHaveBeenNthCalledWith(
+            2,
+            false,
+            0,
+        );
     });
 });
 
