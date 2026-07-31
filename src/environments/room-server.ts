@@ -29,6 +29,12 @@ async function bootstrap() {
         ...(env.autoManageNativeAdmins !== undefined
             ? { autoManageNativeAdmins: env.autoManageNativeAdmins }
             : {}),
+        ...(env.minimumPersistedMatchSeconds !== undefined
+            ? {
+                  minimumPersistedMatchSeconds:
+                      env.minimumPersistedMatchSeconds,
+              }
+            : {}),
         roomId: env.apiReadiness?.roomId,
         roomName: env.roomName,
     });

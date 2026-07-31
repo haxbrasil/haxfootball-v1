@@ -25,7 +25,7 @@ import {
 } from "@room/managed/domain/match-player-events";
 import { t } from "@lingui/core/macro";
 
-const MIN_PERSISTED_MATCH_SECONDS = 30;
+const DEFAULT_MIN_PERSISTED_MATCH_SECONDS = 30;
 const CHECKPOINT_INTERVAL_SECONDS = 2;
 const TERMINAL_RETRY_DELAY_MS = 5_000;
 
@@ -54,6 +54,7 @@ type MatchSession = {
     recordingRevision: number;
     nextProducerSequence: number;
     lastCheckpointScheduledElapsed: number;
+    minimumPersistedMatchSeconds: number;
     replayBytes: Uint8Array | null;
     events: CheckpointEvent[];
     gameEvents: RuntimeMatchEvent[];
@@ -68,6 +69,7 @@ type CreateManagedMatchPersistenceOptions = {
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
     sessionStore: PlayerSessionStore;
+    minimumPersistedMatchSeconds?: number | undefined;
 };
 
 type MatchResponse = {
@@ -86,6 +88,7 @@ export function createManagedMatchPersistence({
     publicWebBaseUrl,
     roomId,
     sessionStore,
+    minimumPersistedMatchSeconds = DEFAULT_MIN_PERSISTED_MATCH_SECONDS,
 }: CreateManagedMatchPersistenceOptions): {
     module: Module;
     matchEvents: RuntimeMatchEventSink;
@@ -138,7 +141,7 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
+            if (elapsedSeconds < minimumPersistedMatchSeconds) {
                 const discarded = await flushCheckpoint(
                     room,
                     currentSession,
@@ -225,6 +228,7 @@ export function createManagedMatchPersistence({
                 recordingRevision: 0,
                 nextProducerSequence: 1,
                 lastCheckpointScheduledElapsed: Number.NEGATIVE_INFINITY,
+                minimumPersistedMatchSeconds,
                 replayBytes: null,
                 events: [],
                 gameEvents: [],
@@ -255,7 +259,7 @@ export function createManagedMatchPersistence({
                 readScore(room, gameScoreReader) ?? currentSession.lastScore;
             const elapsedSeconds = getElapsedSeconds(currentSession);
             const status =
-                elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS
+                elapsedSeconds >= minimumPersistedMatchSeconds
                     ? "ongoing"
                     : "pending";
 
@@ -390,7 +394,9 @@ async function flushCheckpoint(
     const elapsedSeconds = getElapsedSeconds(session);
     const status =
         requestedStatus ??
-        (elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS ? "ongoing" : "pending");
+        (elapsedSeconds >= session.minimumPersistedMatchSeconds
+            ? "ongoing"
+            : "pending");
     const observedAt =
         status === "completed" || status === "discarded"
             ? (session.endedAt ?? new Date()).toISOString()
